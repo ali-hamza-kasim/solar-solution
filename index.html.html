@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Solar Solution - حاسبة المنظومة الشمسية</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    :root{
+      --bg1:#081827;
+      --bg2:#123f63;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#64748b;
+      --line:#e2e8f0;
+      --primary:#f59e0b;
+      --primary2:#facc15;
+      --green:#16a34a;
+      --green2:#22c55e;
+      --blue:#1877F2;
+      --pdf:#0ea5e9;
+      --soft:#f8fafc;
+      --warnbg:#fef2f2;
+      --warn:#991b1b;
+      --okbg:#f0fdf4;
+      --ok:#166534;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Tahoma, Arial, sans-serif;
+      background:
+        radial-gradient(circle at top right, rgba(245,158,11,.18), transparent 26%),
+        radial-gradient(circle at left bottom, rgba(6,182,212,.16), transparent 22%),
+        linear-gradient(135deg, var(--bg1), var(--bg2));
+      min-height:100vh;
+      color:#fff;
+      padding:20px;
+    }
+    .container{max-width:1150px;margin:auto}
+    .hero{text-align:center;padding:20px 10px}
+    .hero h1{margin:0 0 10px;font-size:clamp(30px,4vw,46px)}
+    .hero p{margin:0 auto;max-width:760px;line-height:1.9;color:#dbeafe;font-size:17px}
+    .brand{
+      margin-top:14px;display:inline-block;padding:10px 18px;border-radius:999px;
+      background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);
+      color:#fde68a;font-weight:bold;font-size:15px
+    }
+    .layout{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start;margin-top:16px}
+    .card{
+      background:var(--card);color:var(--text);border-radius:24px;padding:24px;
+      box-shadow:0 18px 40px rgba(0,0,0,.18)
+    }
+    .section-title{margin:0 0 16px;font-size:25px}
+    .grid{display:grid;grid-template-columns:1fr;gap:14px}
+    .field{
+      background:var(--soft);border:1px solid var(--line);border-radius:18px;padding:14px
+    }
+    .field label{display:block;margin-bottom:8px;font-weight:700;font-size:14px;color:#1e293b}
+    .field input,.field select{
+      width:100%;border:1px solid #cbd5e1;border-radius:12px;padding:13px;
+      font-size:16px;outline:none;background:#fff
+    }
+    .field input:focus,.field select:focus{
+      border-color:#38bdf8;box-shadow:0 0 0 4px rgba(56,189,248,.15)
+    }
+    .btn{
+      width:100%;margin-top:16px;border:none;border-radius:18px;padding:16px;
+      background:linear-gradient(90deg,var(--primary),var(--primary2));
+      color:#111827;font-size:18px;font-weight:800;cursor:pointer
+    }
+    .note{
+      margin-top:14px;padding:16px;border-radius:16px;background:#fffbeb;
+      border:1px solid #fde68a;color:#92400e;line-height:1.9;font-size:14px
+    }
+    .results{display:grid;gap:14px}
+    .system-badge{
+      font-weight:bold;color:#0c4a6e;margin:0 0 16px;background:#ecfeff;
+      border:1px solid #a5f3fc;display:inline-block;padding:10px 14px;border-radius:14px
+    }
+    .box{
+      background:linear-gradient(180deg,#fff,#f8fafc);border:1px solid var(--line);
+      border-radius:18px;padding:16px
+    }
+    .box h3{margin:0 0 8px;font-size:16px;color:#0c4a6e}
+    .big{font-size:28px;font-weight:800;color:#0f172a;margin:0 0 6px}
+    .small{color:var(--muted);font-size:14px;line-height:1.8}
+    .status{padding:16px;border-radius:18px;font-size:15px;line-height:2;font-weight:700}
+    .ok{background:var(--okbg);color:var(--ok);border:1px solid #bbf7d0}
+    .warning{background:var(--warnbg);color:var(--warn);border:1px solid #fecaca}
+    .actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:18px}
+    .action-btn{
+      display:inline-flex;justify-content:center;align-items:center;gap:8px;padding:14px 16px;
+      border-radius:15px;text-decoration:none;font-size:15px;font-weight:800;border:none;cursor:pointer
+    }
+    .whatsapp{background:linear-gradient(90deg,var(--green),var(--green2));color:#fff}
+    .facebook{background:var(--blue);color:#fff}
+    .pdf{background:var(--pdf);color:#fff}
+    .footer{text-align:center;margin-top:18px;color:#dbeafe;font-size:14px}
+    .footer strong{color:#fde68a}
+    @media (max-width:950px){
+      .layout{grid-template-columns:1fr}
+      .actions{grid-template-columns:1fr}
+    }
+  </style>
+
+<style>
+.action-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(60%);
+}
+</style>
+
+</head>
+<body>
+  <div class="container">
+    <div class="hero">
+      <h1></h1>
+      
+      <div class="brand">نسخة تجريبية لأخذ الآراء والملاحظات</div>
+    </div>
+
+    
+<div style="background:#fee2e2;color:#7f1d1d;padding:15px;border-radius:12px;margin-bottom:15px;font-weight:bold;line-height:1.8">
+تنويه:<br>
+هذا البرنامج تجريبي وقابل للخطأ، وتم نشره لغرض التجربة وأخذ الآراء فقط.<br><br>
+نرحب بالملاحظات المحترمة والبنّاءة،<br>
+أما أصحاب الشركات أو أي شخص هدفه الانتقاد أو التعليق المسيء، فنرجو الابتعاد عن هذا المنشور.<br><br>
+هدفنا التطوير وليس الدخول في نقاشات سلبية.
+</div>
+
+<div class="layout">
+      <div class="card">
+        <h2 class="section-title">المدخلات</h2>
+        <div class="grid">
+          <div class="field">
+            <label for="systemVoltage">نوع النظام</label>
+            <select id="systemVoltage" onchange="updateBatteryOptions(); 
+function applyRecommended(){
+  const systemVoltage = parseInt(document.getElementById('systemVoltage').value) || 24;
+  const dayAmps = parseFloat(document.getElementById('dayAmps').value) || 0;
+  const nightAmps = parseFloat(document.getElementById('nightAmps').value) || 0;
+  const nightHours = parseFloat(document.getElementById('nightHours').value) || 0;
+
+  const voltage = 220;
+  const requiredInverterKw = Math.max((dayAmps*voltage)/1000,(nightAmps*voltage)/1000)*1.3;
+  const requiredBatteryKwh = (nightAmps*voltage*nightHours)/1000 /0.8;
+
+  const inverterSizes = [3,4,6,8,12];
+  let inv = inverterSizes.find(x=>requiredInverterKw<=x) || 12;
+  document.getElementById('selectedInverter').value = inv;
+
+  const batteryList = systemVoltage==48 ? [
+      {size:5},{size:10},{size:12.5},{size:15},{size:17.5},{size:25}
+  ] : [
+      {size:5},{size:6.4},{size:7.5},{size:10},{size:12.5},{size:15},{size:17.5},{size:25}
+  ];
+  let bat = batteryList.find(x=>requiredBatteryKwh<=x.size) || batteryList[batteryList.length-1];
+  document.getElementById('selectedBattery').value = bat.size;
+
+  calculateSystem();
+}
+
+
+calculateSystem();">
+              <option value="24" selected>24V</option>
+              <option value="48">48V</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="selectedInverter">حجم الانفيرتر المختار</label>
+            <select id="selectedInverter" onchange="calculateSystem()">
+              <option value="3">3 kW</option>
+              <option value="4">4 kW</option>
+              <option value="6">6 kW</option>
+              <option value="8">8 kW</option>
+              <option value="12">12 kW</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="selectedBattery">حجم البطارية المختارة</label>
+            <select id="selectedBattery" onchange="calculateSystem()"></select>
+          </div>
+
+          <div class="field">
+            <label for="dayAmps">أمبير النهار (A)</label>
+            <input type="number" id="dayAmps" min="0" step="0.1" value="6">
+          </div>
+
+          <div class="field">
+            <label for="nightAmps">أمبير الليل (A)</label>
+            <input type="number" id="nightAmps" min="0" step="0.1" value="4">
+          </div>
+
+          <div class="field">
+            <label for="nightHours">عدد ساعات الليل</label>
+            <input type="number" id="nightHours" min="0" step="0.1" value="6">
+          </div>
+
+          <div class="field">
+            <label for="panelsCount">عدد الألواح (615W)</label>
+            <input type="number" id="panelsCount" min="0" step="1" value="3">
+          </div>
+        </div>
+
+        <button class="btn" onclick="calculateSystem()">احسب الآن</button>
+
+        <div class="note">
+          مراجعة الحسابات الحالية:
+          <br>• طاقة النهار = أمبير النهار × 220 × 7 ÷ 1000
+          <br>• طاقة الليل = أمبير الليل × 220 × ساعات الليل ÷ 1000
+          <br>• البطارية المطلوبة = طاقة الليل ÷ 0.8
+          <br>• الانفيرتر المطلوب = أعلى حمل (نهاري أو ليلي) × 1.3
+          <br>• إنتاج الألواح اليومي = عدد الألواح × 0.615 × 7
+        </div>
+
+        
+      </div>
+
+      <div class="card">
+        <h2 class="section-title">النتائج</h2>
+        <div class="system-badge">⚙️ نوع النظام: <span id="systemView">24V</span> DC → 220V AC</div>
+
+        <div class="results">
+          <div class="box">
+            <h3>القدرة النهارية المطلوبة</h3>
+            <p class="big" id="powerKw">—</p>
+            <div class="small">قدرة حمل النهار اللحظية على 220 فولت.</div>
+          </div>
+
+          <div class="box">
+            <h3>القدرة الليلية المطلوبة</h3>
+            <p class="big" id="nightPowerKw">—</p>
+            <div class="small">قدرة حمل الليل اللحظية على 220 فولت.</div>
+          </div>
+
+          <div class="box">
+            <h3>طاقة الليل</h3>
+            <p class="big" id="nightKwh">—</p>
+            <div class="small">استهلاك الليل حسب الساعات المدخلة.</div>
+          </div>
+
+          <div class="box">
+            <h3>طاقة النهار</h3>
+            <p class="big" id="dayKwh">—</p>
+            <div class="small">محسوبة على أساس 7 ساعات نهارية.</div>
+          </div>
+
+          <div class="box">
+            <h3>الطاقة اليومية الكلية</h3>
+            <p class="big" id="totalKwh">—</p>
+            <div class="small">مجموع استهلاك الليل والنهار.</div>
+          </div>
+
+          <div class="box">
+            <h3>الانفيرتر المقترح</h3>
+            <p class="big" id="inverterResult">—</p>
+            <div class="small" id="inverterHint">سيتم اختيار أقرب حجم أعلى.</div>
+          </div>
+
+          <div class="box">
+            <h3>البطارية المقترحة</h3>
+            <p class="big" id="batteryResult">—</p>
+            <div class="small" id="batteryHint">سيتم اختيار أقرب حجم أعلى حسب النظام.</div>
+          </div>
+
+          <div class="box">
+            <h3>قدرة الألواح المركبة</h3>
+            <p class="big" id="panelsPower">—</p>
+            <div class="small">عدد الألواح × 615 واط.</div>
+          </div>
+
+          <div class="box">
+            <h3>إنتاج الألواح اليومي</h3>
+            <p class="big" id="panelsProduction">—</p>
+            <div class="small">محسوب على أساس 7 ساعات يوميًا.</div>
+          </div>
+
+          <div class="box">
+            <h3>السعر بدون تنصيب</h3>
+            <p class="big" id="priceNoInstall">—</p>
+            <div class="small">يشمل الأجهزة فقط: انفيرتر + بطارية + ألواح.</div>
+          </div>
+
+          <div class="box">
+            <h3>السعر مع التنصيب</h3>
+            <p class="big" id="priceWithInstall">—</p>
+            <div class="small">يشمل التنصيب + هيكل ميكانو، وقابل للزيادة أو النقصان حسب عدد الألواح.</div>
+          </div>
+
+          <div class="box">
+            <div class="small" style="color:#991b1b;font-weight:bold">
+              ⚠️ السعر لا يشمل كيبل الوطني وكيبل الايرث
+            </div>
+          </div>
+
+          
+<div class="box">
+  <h3>تفصيل الأسعار</h3>
+  <div class="small">
+    سعر الانفيرتر: <span id="invPrice">—</span><br>
+    سعر البطارية: <span id="batPrice">—</span><br>
+    سعر الألواح: <span id="panPrice">—</span><br>
+    سعر التنصيب: <span id="instPrice">—</span>
+  </div>
+</div>
+
+<div id="statusBox" class="status ok">أدخل القيم ثم اضغط احسب الآن.</div>
+        
+<button class="btn" onclick="applyRecommended()">اعتماد الاختيار المنصوح</button>
+
+
+        
+<div class="note" style="margin-top:18px">
+  هذه الأزرار ظاهرة للعرض فقط في النسخة التجريبية، وتم تعطيل التواصل المباشر مؤقتًا.
+</div>
+
+<div class="actions">
+          <button type="button" id="whatsappBtn" class="action-btn whatsapp disabled" onclick="return false;">💬 إرسال النتيجة واستلام السعر</button>
+          <button type="button" class="action-btn facebook disabled" onclick="return false;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="white" viewBox="0 0 24 24">
+              <path d="M22 12.07C22 6.48 17.52 2 11.93 2S2 6.48 2 12.07c0 4.99 3.66 9.13 8.44 9.93v-7.03H7.9v-2.9h2.54V9.41c0-2.5 1.49-3.88 3.77-3.88 1.09 0 2.23.2 2.23.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56v1.87h2.77l-.44 2.9h-2.33V22c4.78-.8 8.45-4.94 8.45-9.93z"/>
+            </svg>
+            زيارة صفحة الشركة
+          </button>
+          <button onclick="downloadPDF()" class="action-btn pdf">📄 حفظ النتيجة PDF</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer"><strong>برنامج تجريبي</strong></div>
+  </div>
+
+  <script>
+    const inverterSizes = [3, 4, 6, 8, 12];
+    const inverterPrices = {3:450000, 4:450000, 6:550000, 8:850000, 12:1100000};
+
+    const batteryOptions24 = [
+      {size:5, price:930000},
+      {size:6.4, price:1100000},
+      {size:7.5, price:1300000},
+      {size:10, price:1750000},
+      {size:12.5, price:1950000},
+      {size:15, price:2425000},
+      {size:17.5, price:2550000},
+      {size:25, price:4000000}
+    ];
+
+    const batteryOptions48 = [
+      {size:5, price:970000},
+      {size:10, price:1750000},
+      {size:12.5, price:1950000},
+      {size:15, price:2425000},
+      {size:17.5, price:2550000},
+      {size:25, price:4000000}
+    ];
+
+    const panelPrice = 160000;
+    const baseInstallPrice = 250000;
+
+    function formatNum(num){
+      return Number(num).toFixed(2).replace(/\.00$/, '');
+    }
+
+    function getBatteryOptions(systemVoltage){
+      return systemVoltage === 48 ? batteryOptions48 : batteryOptions24;
+    }
+
+    function chooseRecommendedInverter(required){
+      for (const size of inverterSizes){
+        if (required <= size) return size;
+      }
+      return inverterSizes[inverterSizes.length - 1];
+    }
+
+    function chooseRecommendedBattery(required, systemVoltage){
+      const options = getBatteryOptions(systemVoltage);
+      for (const item of options){
+        if (required <= item.size) return item;
+      }
+      return options[options.length - 1];
+    }
+
+    function updateBatteryOptions(){
+      const systemVoltage = parseInt(document.getElementById('systemVoltage').value) || 24;
+      const select = document.getElementById('selectedBattery');
+      const options = getBatteryOptions(systemVoltage);
+      const currentValue = select.value;
+
+      select.innerHTML = '';
+      for (const item of options){
+        const opt = document.createElement('option');
+        opt.value = item.size;
+        opt.textContent = item.size + ' kWh';
+        if (String(item.size) === String(currentValue)) {
+          opt.selected = true;
+        }
+        select.appendChild(opt);
+      }
+    }
+
+    function getInstallPrice(panelsCount){
+      if (panelsCount <= 3) return baseInstallPrice;
+      if (panelsCount <= 5) return baseInstallPrice + 50000;
+      if (panelsCount <= 8) return baseInstallPrice + 100000;
+      return baseInstallPrice + 150000;
+    }
+
+    function calculateSystem(){
+      const systemVoltage = parseInt(document.getElementById('systemVoltage').value) || 24;
+      const dayAmps = parseFloat(document.getElementById('dayAmps').value) || 0;
+      const nightAmps = parseFloat(document.getElementById('nightAmps').value) || 0;
+      const nightHours = parseFloat(document.getElementById('nightHours').value) || 0;
+      const panelsCount = parseInt(document.getElementById('panelsCount').value) || 0;
+
+      const userInverter = parseFloat(document.getElementById('selectedInverter').value) || 3;
+      const batteryList = getBatteryOptions(systemVoltage);
+      let userBattery = parseFloat(document.getElementById('selectedBattery').value);
+      if (!userBattery && batteryList.length){
+        userBattery = batteryList[0].size;
+      }
+
+      const voltage = 220;
+      const dayHours = 7;
+      const panelKw = 0.615;
+      const sunHours = 7;
+
+      const dayPowerKw = (dayAmps * voltage) / 1000;
+      const nightPowerKw = (nightAmps * voltage) / 1000;
+      const nightKwh = (nightAmps * voltage * nightHours) / 1000;
+      const dayKwh = (dayAmps * voltage * dayHours) / 1000;
+      const totalKwh = nightKwh + dayKwh;
+
+      const requiredInverterKw = Math.max(dayPowerKw, nightPowerKw) * 1.3;
+      const recommendedInverter = chooseRecommendedInverter(requiredInverterKw);
+
+      const requiredBatteryKwh = nightKwh / 0.8;
+      const recommendedBattery = chooseRecommendedBattery(requiredBatteryKwh, systemVoltage);
+
+      const chosenBatteryObj = batteryList.find(x => String(x.size) === String(userBattery)) || batteryList[0];
+
+      const panelsPowerKw = panelsCount * panelKw;
+      const panelsProductionKwh = panelsPowerKw * sunHours;
+
+      const inverterPrice = inverterPrices[userInverter] || 0;
+      const batteryPrice = chosenBatteryObj ? chosenBatteryObj.price : 0;
+      const panelsPrice = panelsCount * panelPrice;
+      const installPrice = getInstallPrice(panelsCount);
+
+      const totalPriceNoInstall = inverterPrice + batteryPrice + panelsPrice;
+      
+const totalPriceWithInstall = totalPriceNoInstall + installPrice;
+
+// breakdown display
+document.getElementById('invPrice').textContent = inverterPrice.toLocaleString() + ' د.ع';
+document.getElementById('batPrice').textContent = batteryPrice.toLocaleString() + ' د.ع';
+document.getElementById('panPrice').textContent = panelsPrice.toLocaleString() + ' د.ع';
+document.getElementById('instPrice').textContent = installPrice.toLocaleString() + ' د.ع';
+
+
+      document.getElementById('systemView').textContent = systemVoltage + 'V';
+      document.getElementById('powerKw').textContent = formatNum(dayPowerKw) + ' kW';
+      document.getElementById('nightPowerKw').textContent = formatNum(nightPowerKw) + ' kW';
+      document.getElementById('nightKwh').textContent = formatNum(nightKwh) + ' kWh';
+      document.getElementById('dayKwh').textContent = formatNum(dayKwh) + ' kWh';
+      document.getElementById('totalKwh').textContent = formatNum(totalKwh) + ' kWh';
+
+      document.getElementById('inverterResult').textContent = formatNum(userInverter) + ' kW';
+      document.getElementById('inverterHint').textContent =
+        'الاحتياج المحسوب ≈ ' + formatNum(requiredInverterKw) + ' kW، والمقاس المنصوح به ≈ ' + formatNum(recommendedInverter) + ' kW.';
+
+      document.getElementById('batteryResult').textContent = formatNum(chosenBatteryObj.size) + ' kWh';
+      document.getElementById('batteryHint').textContent =
+        'الاحتياج المحسوب ≈ ' + formatNum(requiredBatteryKwh) + ' kWh، والمقاس المنصوح به ≈ ' + formatNum(recommendedBattery.size) + ' kWh على نظام ' + systemVoltage + 'V.';
+
+      document.getElementById('panelsPower').textContent = formatNum(panelsPowerKw) + ' kW';
+      document.getElementById('panelsProduction').textContent = formatNum(panelsProductionKwh) + ' kWh';
+      document.getElementById('priceNoInstall').textContent = totalPriceNoInstall.toLocaleString() + ' د.ع';
+      document.getElementById('priceWithInstall').textContent = totalPriceWithInstall.toLocaleString() + ' د.ع';
+
+      const statusBox = document.getElementById('statusBox');
+      let messages = [];
+      let isWarning = false;
+
+      if (requiredInverterKw > inverterSizes[inverterSizes.length - 1]){
+        isWarning = true;
+        messages.push('⚠️ تنبيه: الحمل المطلوب أعلى من أكبر انفيرتر معرف في الحاسبة.');
+      }
+
+      if (userInverter < requiredInverterKw){
+        isWarning = true;
+        messages.push('⚠️ اختيار الانفيرتر الحالي لا يناسب الحمل. المنصوح به ' + formatNum(recommendedInverter) + ' kW أو أعلى.');
+      } else if (userInverter > recommendedInverter) {
+        messages.push('ℹ️ الانفيرتر المختار أكبر من الحد الأدنى المطلوب، وهذا يعطيك مجال أمان إضافي.');
+      } else {
+        messages.push('✅ الانفيرتر المختار مناسب للحمل.');
+      }
+
+      if (chosenBatteryObj.size < requiredBatteryKwh){
+        isWarning = true;
+        messages.push('⚠️ اختيار البطارية الحالي لا يكفي لتغطية حمل الليل. المنصوح به ' + formatNum(recommendedBattery.size) + ' kWh أو أعلى.');
+      } else if (chosenBatteryObj.size > recommendedBattery.size) {
+        messages.push('ℹ️ البطارية المختارة أكبر من الحد الأدنى المطلوب، وهذا يعطيك مدة تشغيل واحتياط أفضل.');
+      } else {
+        messages.push('✅ البطارية المختارة مناسبة لحمل الليل.');
+      }
+
+      if (panelsProductionKwh < totalKwh){
+        isWarning = true;
+        const missing = Math.max(0, totalKwh - panelsProductionKwh);
+        const extraPanels = Math.ceil(missing / (panelKw * sunHours));
+        messages.push('⚠️ نصيحة: عدد الألواح الحالي لا يكفي، ويُفضل إضافة ' + extraPanels + ' لوح/ألواح تقريبًا.');
+      } else {
+        messages.push('✅ الألواح الحالية كافية نظريًا لتغطية الاستهلاك اليومي.');
+      }
+
+      statusBox.className = 'status ' + (isWarning ? 'warning' : 'ok');
+      statusBox.innerHTML = messages.join('<br>');
+
+      const whatsappMessage =
+        'مرحبا، أريد سعر لهذه المنظومة:%0A%0A' +
+        'نوع النظام: ' + systemVoltage + 'V%0A' +
+        'عدد الألواح: ' + panelsCount + ' لوح 615W%0A' +
+        'الانفيرتر المختار: ' + formatNum(userInverter) + ' kW%0A' +
+        'البطارية المختارة: ' + formatNum(chosenBatteryObj.size) + ' kWh%0A%0A' +
+        'الانفيرتر المنصوح به: ' + formatNum(recommendedInverter) + ' kW%0A' +
+        'البطارية المنصوح بها: ' + formatNum(recommendedBattery.size) + ' kWh%0A%0A' +
+        'طاقة الليل: ' + formatNum(nightKwh) + ' kWh%0A' +
+        'طاقة النهار: ' + formatNum(dayKwh) + ' kWh%0A' +
+        'إجمالي الطاقة اليومية: ' + formatNum(totalKwh) + ' kWh%0A%0A' +
+        'السعر بدون تنصيب: ' + totalPriceNoInstall.toLocaleString() + ' د.ع%0A' +
+        'السعر مع التنصيب: ' + totalPriceWithInstall.toLocaleString() + ' د.ع%0A' +
+        'السعر لا يشمل كيبل الوطني وكيبل الايرث';
+
+      // تم تعطيل زر واتساب في النسخة التجريبية
+    }
+
+    async function downloadPDF(){
+      
+function applyRecommended(){
+  const systemVoltage = parseInt(document.getElementById('systemVoltage').value) || 24;
+  const dayAmps = parseFloat(document.getElementById('dayAmps').value) || 0;
+  const nightAmps = parseFloat(document.getElementById('nightAmps').value) || 0;
+  const nightHours = parseFloat(document.getElementById('nightHours').value) || 0;
+
+  const voltage = 220;
+  const requiredInverterKw = Math.max((dayAmps*voltage)/1000,(nightAmps*voltage)/1000)*1.3;
+  const requiredBatteryKwh = (nightAmps*voltage*nightHours)/1000 /0.8;
+
+  const inverterSizes = [3,4,6,8,12];
+  let inv = inverterSizes.find(x=>requiredInverterKw<=x) || 12;
+  document.getElementById('selectedInverter').value = inv;
+
+  const batteryList = systemVoltage==48 ? [
+      {size:5},{size:10},{size:12.5},{size:15},{size:17.5},{size:25}
+  ] : [
+      {size:5},{size:6.4},{size:7.5},{size:10},{size:12.5},{size:15},{size:17.5},{size:25}
+  ];
+  let bat = batteryList.find(x=>requiredBatteryKwh<=x.size) || batteryList[batteryList.length-1];
+  document.getElementById('selectedBattery').value = bat.size;
+
+  calculateSystem();
+}
+
+
+calculateSystem();
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      const systemVoltage = document.getElementById('systemVoltage').value;
+      const panels = document.getElementById('panelsCount').value;
+      const inverter = document.getElementById('inverterResult').textContent;
+      const battery = document.getElementById('batteryResult').textContent;
+      const total = document.getElementById('totalKwh').textContent;
+      const noInstall = document.getElementById('priceNoInstall').textContent;
+      const withInstall = document.getElementById('priceWithInstall').textContent;
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(18);
+      doc.text('Solar Solution Report', 20, 20);
+
+      doc.setFontSize(12);
+      const lines = [
+        'System Type: ' + systemVoltage + 'V',
+        'Panels Count: ' + panels + ' x 615W',
+        'Chosen Inverter: ' + inverter,
+        'Chosen Battery: ' + battery,
+        'Total Daily Energy: ' + total,
+        'Price Without Installation: ' + noInstall,
+        'Price With Installation: ' + withInstall,
+        'Note: Price does not include national cable and earth cable'
+      ];
+
+      let y = 35;
+      for (const line of lines){
+        doc.text(line, 20, y);
+        y += 10;
+      }
+
+      doc.save('solar_solution_report.pdf');
+    }
+
+    updateBatteryOptions();
+    
+function applyRecommended(){
+  const systemVoltage = parseInt(document.getElementById('systemVoltage').value) || 24;
+  const dayAmps = parseFloat(document.getElementById('dayAmps').value) || 0;
+  const nightAmps = parseFloat(document.getElementById('nightAmps').value) || 0;
+  const nightHours = parseFloat(document.getElementById('nightHours').value) || 0;
+
+  const voltage = 220;
+  const requiredInverterKw = Math.max((dayAmps*voltage)/1000,(nightAmps*voltage)/1000)*1.3;
+  const requiredBatteryKwh = (nightAmps*voltage*nightHours)/1000 /0.8;
+
+  const inverterSizes = [3,4,6,8,12];
+  let inv = inverterSizes.find(x=>requiredInverterKw<=x) || 12;
+  document.getElementById('selectedInverter').value = inv;
+
+  const batteryList = systemVoltage==48 ? [
+      {size:5},{size:10},{size:12.5},{size:15},{size:17.5},{size:25}
+  ] : [
+      {size:5},{size:6.4},{size:7.5},{size:10},{size:12.5},{size:15},{size:17.5},{size:25}
+  ];
+  let bat = batteryList.find(x=>requiredBatteryKwh<=x.size) || batteryList[batteryList.length-1];
+  document.getElementById('selectedBattery').value = bat.size;
+
+  calculateSystem();
+}
+
+
+calculateSystem();    
+function applyRecommended(){
+  const systemVoltage = parseInt(document.getElementById('systemVoltage').value) || 24;
+  const dayAmps = parseFloat(document.getElementById('dayAmps').value) || 0;
+  const nightAmps = parseFloat(document.getElementById('nightAmps').value) || 0;
+  const nightHours = parseFloat(document.getElementById('nightHours').value) || 0;
+
+  const voltage = 220;
+  const requiredInverterKw = Math.max((dayAmps*voltage)/1000,(nightAmps*voltage)/1000)*1.3;
+  const requiredBatteryKwh = (nightAmps*voltage*nightHours)/1000 /0.8;
+
+  const inverterSizes = [3,4,6,8,12];
+  let inv = inverterSizes.find(x=>requiredInverterKw<=x) || 12;
+  document.getElementById('selectedInverter').value = inv;
+
+  const batteryList = systemVoltage==48 ? [
+      {size:5},{size:10},{size:12.5},{size:15},{size:17.5},{size:25}
+  ] : [
+      {size:5},{size:6.4},{size:7.5},{size:10},{size:12.5},{size:15},{size:17.5},{size:25}
+  ];
+  let bat = batteryList.find(x=>requiredBatteryKwh<=x.size) || batteryList[batteryList.length-1];
+  document.getElementById('selectedBattery').value = bat.size;
+
+  calculateSystem();
+}
+
+
+calculateSystem();
+  </script>
+</body>
+</html>
